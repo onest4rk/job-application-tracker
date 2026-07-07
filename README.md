@@ -1,36 +1,144 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# JobTrackr — Job Application Tracker
+
+A production-ready web app for tracking job applications through the pipeline: Applied → Interview → Offer → Rejected.
+
+Built with Next.js 16, TypeScript, Prisma, SQLite, Tailwind CSS, and more.
+
+## Features
+
+- **Authentication** — Email/password sign-up and sign-in via NextAuth Credentials provider
+- **Job Application CRUD** — Create, edit, archive, and delete applications
+- **Kanban Board** — Drag-and-drop applications between status columns using @dnd-kit
+- **Reminders & Follow-ups** — Set follow-up dates per application with overdue alerts
+- **Dashboard** — Summary cards, status breakdown pie chart, weekly trend bar chart
+- **Analytics** — Response rate, interview rate, offer rate, funnel summary
+- **Notes & Tags** — Add notes per application, tag with colors
+- **Activity Log** — Automatic timeline of status changes and actions
+- **Search, Filter & Sort** — Find applications quickly
+- **Responsive** — Works on desktop and mobile
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| Database | SQLite (local) / Turso (production) |
+| ORM | Prisma 7 |
+| Auth | NextAuth v5 (Credentials) |
+| Styling | Tailwind CSS 4 |
+| Charts | Recharts |
+| Drag & Drop | @dnd-kit |
+| Validation | Zod 4 |
+| Testing | Jest + React Testing Library |
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20+
+- npm
+
+### Setup
 
 ```bash
+# Clone the repo
+cd job-application-tracker
+
+# Install dependencies
+npm install
+
+# Copy environment variables
+cp .env.example .env
+
+# Generate Prisma client and push schema
+npx prisma generate
+npx prisma db push
+
+# Seed the database with demo data
+npm run seed
+
+# Start the dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit [http://localhost:3000](http://localhost:3000) and sign in with:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+Email:    demo@jobtrackr.com
+Password: password123
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Environment Variables
 
-## Learn More
+```env
+DATABASE_URL="file:./prisma/dev.db"
+NEXTAUTH_SECRET="your-secret-here"
+NEXTAUTH_URL="http://localhost:3000"
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Testing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Run all tests
+npm test
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Run tests in watch mode
+npm run test:watch
+```
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+├── app/
+│   ├── (auth)/        # Login, Signup pages
+│   ├── (app)/         # Dashboard, Kanban, Applications, Reminders, Analytics
+│   └── api/           # NextAuth route handler
+├── components/
+│   ├── applications/  # Application card, modal
+│   ├── kanban/        # Kanban board, column, card
+│   ├── reminders/     # Reminders list
+│   ├── dashboard/     # Dashboard content, charts
+│   └── layout/        # Sidebar navigation
+├── actions/           # Server Actions
+├── lib/               # Prisma client, auth config, validations, utils
+└── types/             # TypeScript types
+prisma/
+├── schema.prisma      # Database schema
+└── seed.ts            # Seed script
+middleware.ts          # Auth middleware
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment
+
+### Vercel (Free Tier)
+
+1. Push the repo to GitHub
+2. Import into Vercel
+3. Set environment variables:
+   - `DATABASE_URL` — For production, use Turso (libSQL) and set the URL
+   - `NEXTAUTH_SECRET` — Generate a random string
+   - `NEXTAUTH_URL` — Your production URL
+
+### Turso (Production Database)
+
+```bash
+# Install Turso CLI
+npm install -g turso
+
+# Create a database
+turso db create jobtrackr
+
+# Get the connection URL
+turso db show jobtrackr --url
+
+# Create an auth token
+turso db tokens create jobtrackr
+```
+
+Update `DATABASE_URL` in your production environment.
+
+## License
+
+MIT

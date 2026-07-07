@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String        @id @default(cuid())
+  name          String
+  email         String        @unique
+  password      String
+  image         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  applications  Application[]
+  reminders     Reminder[]
+  notes         ApplicationNote[]
+  activityLogs  ActivityLog[]
+  tags          Tag[]
+  settings      UserSettings?
+}
+
+model Application {
+  id              String            @id @default(cuid())
+  companyName     String
+  role            String
+  location        String
+  applicationDate DateTime          @default(now())
+  jobUrl          String?
+  salaryRange     String?
+  notes           String?
+  status          String            @default("Applied")
+  priority        String            @default("medium")
+  source          String            @default("company site")
+  nextFollowUp    DateTime?
+  lastContactDate DateTime?
+  contactName     String?
+  archived        Boolean           @default(false)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  deletedAt       DateTime?
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reminders       Reminder[]
+  appNotes        ApplicationNote[]
+  activityLogs    ActivityLog[]
+  tags            ApplicationTag[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([userId, status])
+}
+
+model Reminder {
+  id              String        @id @default(cuid())
+  followUpDate    DateTime
+  note            String?
+  completed       Boolean       @default(false)
+  dismissed       Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId   String
+  application     Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([applicationId])
+  @@index([followUpDate])
+}
+
+model ApplicationNote {
+  id            String        @id @default(cuid())
+  content       String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId String
+  application   Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+}
+
+model Tag {
+  id         String            @id @default(cuid())
+  name       String
+  color      String            @default("#6366f1")
+  userId     String
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications ApplicationTag[]
+
+  @@unique([userId, name])
+}
+
+model ApplicationTag {
+  applicationId String
+  tagId         String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  tag           Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([applicationId, tagId])
+}
+
+model ActivityLog {
+  id            String      @id @default(cuid())
+  action        String
+  description   String?
+  createdAt     DateTime    @default(now())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+  @@index([userId])
+}
+
+model UserSettings {
+  id                String @id @default(cuid())
+  emailNotifications Boolean @default(true)
+  userId            String @unique
+  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
